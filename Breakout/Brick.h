@@ -1,44 +1,49 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Config.cpp"
+#include <memory>
 #include <vector>
+#include <map>
+#include <string>
+#include <cstdlib>
 
-enum class powerUpType
-{
-	None,
-	ExpandPaddle,
-	ShrinkPaddle,
-	ExtraLife,
-	MultiBall,
-	StickyPaddle
-};
+#include "Config.hpp"
+#include "PowerUps.h"
 
 struct BrickTile
 {
-	sf::Vector2f position;
-	powerUpType powerUp = powerUpType::None;
 	bool active = true;
+
+	std::string textureName = "green";
+	powerUpType powerUp = powerUpType::None;
 };
 
 class Brick
 {
 public:
 	Brick();
+
 	void draw(sf::RenderWindow& window);
+
 	const std::vector<std::vector<BrickTile>>& getBricks() const { return brickGrid; }
 	std::vector<std::vector<BrickTile>>& getBricks() { return brickGrid; }
-	sf::FloatRect getBrickBounds(int row, int col) const;
-	void deActivateBrick(int row, int col) { brickGrid[row][col].active = false; }
-	bool allDestroyed() const
-	{
-		for (const auto& row : brickGrid)
-			for (const auto& tile : row)
-				if (tile.active)
-					return false;
-		return true;
-	}
+
+	sf::FloatRect getBounds(int row, int col) const;
+
+	void deactivateBrick(int row, int col);
+
+	bool isCleared() const;
+
+	void reset();
+
+private:
+	void loadTextures(const std::string& name, const std::string& path);
+	void initializeGrid();
+
 private:
 	std::vector<std::vector<BrickTile>> brickGrid;
+
+	std::map<std::string, sf::Texture> m_textures;
+	std::unique_ptr<sf::Sprite> m_sprite;
 
 	int rows;
 	int cols;

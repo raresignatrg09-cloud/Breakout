@@ -1,32 +1,56 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Config.cpp"
+
+#include "Config.hpp"
 #include "Paddle.h"
 #include "Brick.h"
+
+struct BrickCollisionResult
+{
+	bool collided = false;
+	powerUpType powerUp = powerUpType::None;
+	sf::Vector2f position;
+};
 
 class Ball
 {
 public:
-	Ball();
+	Ball(sf::Vector2f position);
+
 	void update(sf::Time deltaTime, const sf::Vector2u& windowSize);
 	void render(sf::RenderWindow& window);
-	bool isOutOfBounds() const;
+
 	void reset();
+
+	bool isLaunched() const { return m_isLaunched; }
+	bool isOutOfBounds() const;
+
 	sf::FloatRect getGlobalBounds() const { return m_shape.getGlobalBounds(); }
+	
 	void handlePaddleCollision(const Paddle& paddle);
-	void handleBrickCollision(Brick& brick);
+	
+	BrickCollisionResult handleBrickCollision(Brick& brick);
 	void normalizeVelocity();
+	
+	void setLaunched(bool launched) { m_isLaunched = launched; }
+	
+	void followPaddle(const Paddle& paddle);
+
+	sf::Vector2f getVelocity() const { return m_velocity; }
+	void setVelocity(const sf::Vector2f& velocity) { m_velocity = velocity; }
+
+	void setColor(const sf::Color& color) { m_shape.setFillColor(color); }
+
+private:
 	void bounceX() { m_velocity.x *= -1.f; }
 	void bounceY() { m_velocity.y *= -1.f; }
 
-	int getScore() const { return score; }
-	void addScore(int points) { score += points; }
-
 private:
 	sf::CircleShape m_shape;
+
 	sf::Vector2f m_velocity;
-	float m_speed;
+	sf::Vector2f m_initPosition;
 
-	int score = 0;
+	float m_speed = BallConfig::speed;
+	bool  m_isLaunched = false;
 };
-

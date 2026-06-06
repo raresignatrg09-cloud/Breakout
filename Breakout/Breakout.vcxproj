@@ -133,18 +133,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\External\TextManager\TextManager.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Breakout.cpp" />
     <ClCompile Include="Brick.cpp" />
-    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Config.hpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Paddle.cpp" />
+    <ClCompile Include="PowerUps.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\External\TextManager\TextManager.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Paddle.h" />
+    <ClInclude Include="PowerUps.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

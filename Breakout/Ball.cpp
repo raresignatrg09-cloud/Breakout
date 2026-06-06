@@ -2,29 +2,22 @@
 #include <cmath>
 #include <iostream>
 
-Ball::Ball()
-	: m_speed(BallConfig::speed),
-	m_velocity(BallConfig::speed, -BallConfig::speed)
+Ball::Ball(sf::Vector2f position)
+	:m_velocity(BallConfig::speed, -BallConfig::speed),
+	m_initPosition(position)
 {
 	m_shape.setRadius(BallConfig::radius);
 
-	m_shape.setOrigin({
-		m_shape.getRadius(),
-		m_shape.getRadius()
-		});
-
 	m_shape.setFillColor(sf::Color::White);
 
-	m_shape.setPosition({
-		WinConfig::WINDOW_WIDTH / 2.f,
-		WinConfig::WINDOW_HEIGHT / 2.f
-		});
+	m_shape.setPosition(position);
 }
 
 void Ball::update(sf::Time deltaTime, const sf::Vector2u& windowSize)
 {
-	m_shape.move(m_velocity * deltaTime.asSeconds());
-
+	if(isLaunched())
+		m_shape.move(m_velocity * deltaTime.asSeconds());
+	
 	sf::Vector2f position = m_shape.getPosition();
 	float radius = m_shape.getRadius();
 
@@ -61,16 +54,10 @@ bool Ball::isOutOfBounds() const
 
 void Ball::reset()
 {
-	m_shape.setPosition({
-		WinConfig::WINDOW_WIDTH / 2.f,
-		WinConfig::WINDOW_HEIGHT / 2.f
-		});
+	m_shape.setPosition(m_initPosition);
+	setLaunched(false);
 
-	m_velocity = {
-		BallConfig::speed,
-		-BallConfig::speed
-	};
-	score = 0;
+	m_velocity = { BallConfig::speed,-BallConfig::speed };
 }
 
 void Ball::handlePaddleCollision(const Paddle& paddle)
@@ -92,57 +79,68 @@ void Ball::handlePaddleCollision(const Paddle& paddle)
 	normalizeVelocity();
 }
 
-void Ball::handleBrickCollision(Brick& brick)
+BrickCollisionResult Ball::handleBrickCollision(Brick& brick)
 {
 	auto& bricks = brick.getBricks();
 
-	for (int row = 0; row < bricks.size(); ++row)
+	sf::FloatRect ballBounds = getGlobalBounds();
+	BrickCollisionResult result;
+
+	for (int row = 0; row < static_cast<int>(bricks.size()); ++row)
 	{
-		for(int col=0;col<bricks[row].size();++col)
+		for (int col = 0; col < static_cast<int>(bricks[row].size()); ++col)
 		{
 			BrickTile& tile = bricks[row][col];
-			if (tile.active)
+
+			if (!tile.active)
+				continue;
+
+			sf::FloatRect brickBounds = brick.getBounds(row, col);
+
+			auto intersection = ballBounds.findIntersection(brickBounds);
+
+			if (intersection.has_value())
 			{
-				sf::FloatRect brickBounds = brick.getBrickBounds(row, col);
+				BrickCollisionResult result;
 
-				sf::FloatRect ballBounds = getGlobalBounds();
+				result.collided = true;
+				result.powerUp = tile.powerUp;
+				result.position = brickBounds.getCenter();
 
-				if (ballBounds.findIntersection(brickBounds))
+				brick.deactivateBrick(row, col);
+
+				// Collision response
+				sf::Vector2f ballCenter = ballBounds.getCenter();
+				sf::Vector2f brickCenter = brickBounds.getCenter();
+
+				float dx = ballCenter.x - brickCenter.x;
+				float dy = ballCenter.y - brickCenter.y;
+
+				if (std::abs(dx) > std::abs(dy))
 				{
-					tile.active = false;
-					addScore(1);
-					std::cout << "Score: " << getScore() << std::endl;
+					bounceX();
 
-					sf::Vector2f ballCenter = getGlobalBounds().getCenter();
-					sf::Vector2f brickCenter = brickBounds.getCenter();
-
-					float dx = ballCenter.x - brickCenter.x;
-					float dy = ballCenter.y - brickCenter.y;
-
-					if (std::abs(dx) > std::abs(dy))
-					{
-						bounceX();
-
-						if (dx > 0)
-							m_shape.move({1.f, 0.f});
-						else
-						
-							m_shape.move({-1.f, 0.f});
-					}
+					if (dx > 0)
+						m_shape.move({ 1.f, 0.f });
 					else
-					{
-						bounceY();
-
-						if (dy > 0)
-							m_shape.move({0.f, 1.f});
-						else
-							m_shape.move({0.f, -1.f});
-					}
-					return;
+						m_shape.move({ -1.f, 0.f });
 				}
+				else
+				{
+					bounceY();
+
+					if (dy > 0)
+						m_shape.move({ 0.f, 1.f });
+					else
+						m_shape.move({ 0.f, -1.f });
+				}
+
+				return result;
 			}
 		}
 	}
+
+	return {};
 }
 
 void Ball::normalizeVelocity()
@@ -154,4 +152,13 @@ void Ball::normalizeVelocity()
 
 	m_velocity /= length;
 	m_velocity *= m_speed;
+}
+
+void Ball::followPaddle(const Paddle& paddle)
+{
+	sf::Vector2f paddlePos = paddle.getPosition();
+	m_shape.setPosition({
+		paddlePos.x + PaddleConfig::PADDLE_WIDTH / 2.f - m_shape.getRadius(),
+		paddlePos.y - 2.f * m_shape.getRadius() - 1.f
+		});
 }
