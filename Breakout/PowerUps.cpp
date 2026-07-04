@@ -37,7 +37,7 @@ PowerUps::PowerUps(powerUpType type, sf::Vector2f position)
 
 void PowerUps::update(sf::Time deltaTime)
 {
-	m_shape.move({0.f, m_fallSpeed * deltaTime.asSeconds()});
+	m_shape.move({0.f, PowerUpConfig::fallSpeed * deltaTime.asSeconds()});
 }
 
 void PowerUps::render(sf::RenderWindow & window)

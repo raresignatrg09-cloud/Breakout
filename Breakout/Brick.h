@@ -20,7 +20,7 @@ struct BrickTile
 class Brick
 {
 public:
-	Brick();
+	Brick(sf::Vector2u windowSize);
 
 	void draw(sf::RenderWindow& window);
 
@@ -39,11 +39,17 @@ private:
 	void loadTextures(const std::string& name, const std::string& path);
 	void initializeGrid();
 
+	float getOffsetX() const;
+	float getOffsetY() const { return 50.f; }
+	float getTotalWidth() const;
+
 private:
 	std::vector<std::vector<BrickTile>> brickGrid;
 
 	std::map<std::string, sf::Texture> m_textures;
 	std::unique_ptr<sf::Sprite> m_sprite;
+
+	sf::Vector2u m_windowSize;
 
 	int rows;
 	int cols;

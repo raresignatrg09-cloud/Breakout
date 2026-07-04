@@ -1,0 +1,10 @@
+{
+    "ballsLost": 0,
+    "bricksDestroyed": 0,
+    "gamesLost": 0,
+    "gamesPlayed": 0,
+    "gamesWon": 0,
+    "highestScore": 0,
+    "powerUpsCollected": 0,
+    "totalPlayTime": 0
+}

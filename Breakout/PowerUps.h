@@ -29,6 +29,5 @@ public:
 private:
 	sf::CircleShape m_shape;
 	powerUpType m_type;
-	float m_fallSpeed = 150.f;
 };
 

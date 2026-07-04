@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <unordered_map>
+
 #include "Config.hpp"
 
 enum class PaddleState
@@ -14,7 +15,7 @@ enum class PaddleState
 class Paddle
 {
 public:
-	Paddle();
+	Paddle(sf::Vector2u windowSize);
 	void update(sf::Time deltaTime);
 	void render(sf::RenderWindow& window);
 	sf::FloatRect getGlobalBounds() const { return m_shape.getGlobalBounds(); }
@@ -35,6 +36,7 @@ private:
 
 private:
 	sf::RectangleShape m_shape;
+	sf::Vector2u m_windowSize;
 	float m_speed;
 	sf::Vector2f m_velocity;
 	std::unordered_map<std::string, sf::Texture> m_textures;

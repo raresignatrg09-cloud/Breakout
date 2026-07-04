@@ -1,15 +1,14 @@
 #include "Ball.h"
+
 #include <cmath>
 #include <iostream>
 
-Ball::Ball(sf::Vector2f position)
+Ball::Ball(sf::Vector2f position, sf::Vector2u windowSize)
 	:m_velocity(BallConfig::speed, -BallConfig::speed),
-	m_initPosition(position)
+	m_initPosition(position), m_windowSize(windowSize)
 {
 	m_shape.setRadius(BallConfig::radius);
-
 	m_shape.setFillColor(sf::Color::White);
-
 	m_shape.setPosition(position);
 }
 
@@ -49,7 +48,7 @@ void Ball::render(sf::RenderWindow & window)
 bool Ball::isOutOfBounds() const
 {
 	return m_shape.getPosition().y - m_shape.getRadius()
-	> WinConfig::WINDOW_HEIGHT;
+	> m_windowSize.y;
 }
 
 void Ball::reset()

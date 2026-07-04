@@ -15,7 +15,7 @@ struct BrickCollisionResult
 class Ball
 {
 public:
-	Ball(sf::Vector2f position);
+	Ball(sf::Vector2f position, sf::Vector2u windowSize);
 
 	void update(sf::Time deltaTime, const sf::Vector2u& windowSize);
 	void render(sf::RenderWindow& window);
@@ -47,6 +47,7 @@ private:
 
 private:
 	sf::CircleShape m_shape;
+	sf::Vector2u m_windowSize;
 
 	sf::Vector2f m_velocity;
 	sf::Vector2f m_initPosition;

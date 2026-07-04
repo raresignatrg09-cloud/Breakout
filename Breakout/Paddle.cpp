@@ -1,9 +1,11 @@
 #include "Paddle.h"
+
 #include <iostream>
 
-Paddle::Paddle()
+Paddle::Paddle(sf::Vector2u windowSize)
 	: m_speed(PaddleConfig::PADDLE_SPEED),
-	m_velocity(0.f, 0.f)
+	m_velocity(0.f, 0.f),
+	m_windowSize(windowSize)
 {
 	m_shape.setSize({ PaddleConfig::PADDLE_WIDTH, PaddleConfig::PADDLE_HEIGHT });
 	m_shape.setOutlineThickness(2.f);
@@ -11,8 +13,8 @@ Paddle::Paddle()
 	m_shape.setFillColor(sf::Color::Blue);
 
 	m_shape.setPosition({
-		WinConfig::WINDOW_WIDTH / 2.f - m_shape.getSize().x / 2.f,
-		WinConfig::WINDOW_HEIGHT - m_shape.getSize().y - 10.f
+		m_windowSize.x / 2.f - m_shape.getSize().x / 2.f,
+		m_windowSize.y - m_shape.getSize().y - 10.f
 		});
 
 	loadTextures("paddle", "assets/sprites/paddle.png");
@@ -39,7 +41,7 @@ void Paddle::update(sf::Time deltaTime)
 	if (m_size != PaddleState::Normal)
 	{
 		m_powerUpTime -= deltaTime;
-		std::cout << "Power-up time remaining: " << m_powerUpTime.asSeconds() << " seconds\n";
+		//std::cout << "Power-up time remaining: " << m_powerUpTime.asSeconds() << " seconds\n";
 		if (m_powerUpTime <= sf::Time::Zero)
 		{
 			normal();
@@ -57,8 +59,8 @@ void Paddle::render(sf::RenderWindow& window)
 void Paddle::reset()
 {
 	m_shape.setPosition({
-		WinConfig::WINDOW_WIDTH / 2.f - m_shape.getSize().x / 2.f,
-		WinConfig::WINDOW_HEIGHT - m_shape.getSize().y - 10.f
+		m_windowSize.x / 2.f - m_shape.getSize().x / 2.f,
+		m_windowSize.y - m_shape.getSize().y - 10.f
 		});
 	
 	m_sprite->setPosition(m_shape.getPosition());
@@ -117,10 +119,10 @@ void Paddle::outOfBoundsCheck()
 		
 		m_sprite->setPosition(m_shape.getPosition());
 	}
-	else if (m_shape.getPosition().x + m_shape.getSize().x > WinConfig::WINDOW_WIDTH)
+	else if (m_shape.getPosition().x + m_shape.getSize().x > m_windowSize.x)
 	{
 		m_shape.setPosition({
-			WinConfig::WINDOW_WIDTH - m_shape.getSize().x,
+			m_windowSize.x - m_shape.getSize().x,
 			m_shape.getPosition().y
 			});
 

@@ -1,8 +1,9 @@
 #include "Brick.h"
 #include <stdexcept>
+#include <iostream>
 
-Brick::Brick()
-	: rows(12), cols(10)
+Brick::Brick(sf::Vector2u windowSize)
+	: rows(8), cols(12), m_windowSize(windowSize)
 {
 	//load textures for different brick types
 	loadTextures("green", "assets/sprites/block_green.png");
@@ -12,9 +13,6 @@ Brick::Brick()
 
 	//configure sprite (used for drawing bricks)
 	m_sprite = std::make_unique<sf::Sprite>(m_textures["green"]);
-
-	float offsetX = (WinConfig::WINDOW_WIDTH - (cols * BrickConfig::BRICK_WIDTH)) / 2.f;
-	float offsetY = 50.f;
 
 	auto texSize = m_textures.at("green").getSize();
 
@@ -31,10 +29,6 @@ Brick::Brick()
 
 void Brick::draw(sf::RenderWindow& window)
 {
-	float offsetX = 
-		(WinConfig::WINDOW_WIDTH - (cols * BrickConfig::BRICK_WIDTH)) / 2.f;
-	float offsetY = 50.f;
-
 	for (int row = 0; row < rows; ++row)
 	{
 		for (int col = 0; col < cols; ++col)
@@ -47,10 +41,13 @@ void Brick::draw(sf::RenderWindow& window)
 			m_sprite->setTexture(m_textures.at(tile.textureName));
 
 			m_sprite->setPosition({
-				offsetX + col * BrickConfig::BRICK_WIDTH,
-				offsetY + row * BrickConfig::BRICK_HEIGHT
+				getOffsetX() + col * (BrickConfig::BRICK_WIDTH + BrickConfig::BRICK_SPACING),
+				getOffsetY() + row * (BrickConfig::BRICK_HEIGHT + BrickConfig::BRICK_SPACING)
 				});
 
+			int activeCount = 0;
+
+			
 			window.draw(*m_sprite);
 		}
 	}
@@ -61,14 +58,10 @@ sf::FloatRect Brick::getBounds(int row, int col) const
 	if (row < 0 || row >= rows || col < 0 || col >= cols)
 		return {};
 
-	float offsetX = 
-		(WinConfig::WINDOW_WIDTH - (cols * BrickConfig::BRICK_WIDTH)) / 2.f;
-	float offsetY = 50.f;
-
 	return {
 		{
-			offsetX + col * BrickConfig::BRICK_WIDTH,
-			offsetY + row * BrickConfig::BRICK_HEIGHT
+			getOffsetX() + col * (BrickConfig::BRICK_WIDTH + BrickConfig::BRICK_SPACING),
+			getOffsetY() + row * (BrickConfig::BRICK_HEIGHT + BrickConfig::BRICK_SPACING)
 		},
 		{
 			BrickConfig::BRICK_WIDTH,
@@ -102,6 +95,17 @@ void Brick::reset()
 	initializeGrid();
 }
 
+float Brick::getOffsetX() const
+{
+	return (m_windowSize.x - getTotalWidth()) / 2.f;
+}
+
+float Brick::getTotalWidth() const
+{
+	return cols * BrickConfig::BRICK_WIDTH +
+		(cols - 1) * BrickConfig::BRICK_SPACING;
+}
+
 void Brick::loadTextures(const std::string& name, const std::string& path)
 {
 	sf::Texture texture;
@@ -109,7 +113,7 @@ void Brick::loadTextures(const std::string& name, const std::string& path)
 	if(!texture.loadFromFile(path))
 		throw std::runtime_error("Failed to load brick texture!");
 
-	m_textures.emplace(name, std::move(texture));
+	m_textures[name] = std::move(texture);
 }
 
 void Brick::initializeGrid()
@@ -120,27 +124,27 @@ void Brick::initializeGrid()
 		{
 			brickGrid[row][col].active = true;
 
-			if (row < 3)
+			if (row < 2)
 				brickGrid[row][col].textureName = "brown";
-			else if (row < 6)
+			else if (row < 4)
 				brickGrid[row][col].textureName = "blue";
-			else if (row < 9)
+			else if (row < 6)
 				brickGrid[row][col].textureName = "pink";
 			else
 				brickGrid[row][col].textureName = "green";
 
 			int powerUpChance = std::rand() % 100;
 
-			if (powerUpChance < 15)
+			if (powerUpChance < PowerUpConfig::expandChance)
 				brickGrid[row][col].powerUp = powerUpType::ExpandPaddle;
-			else if (powerUpChance < 10)
+			else if (powerUpChance < PowerUpConfig::shrinkChance)
 				brickGrid[row][col].powerUp = powerUpType::ShrinkPaddle;
-			else if (powerUpChance < 20)
+			else if (powerUpChance < PowerUpConfig::extraLifeChance)
 				brickGrid[row][col].powerUp = powerUpType::ExtraLife;
-			else if (powerUpChance < 50)
+			else if (powerUpChance < PowerUpConfig::multiBallChance)
 				brickGrid[row][col].powerUp = powerUpType::MultiBall;
-			else if (powerUpChance < 15)
-				brickGrid[row][col].powerUp = powerUpType::StickyPaddle;
+			//else if (powerUpChance < PowerUpConfig::stickyPaddleChance)
+				//brickGrid[row][col].powerUp = powerUpType::StickyPaddle;
 			else
 				brickGrid[row][col].powerUp = powerUpType::None;
 		}
