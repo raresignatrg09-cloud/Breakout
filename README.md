@@ -11,6 +11,6 @@ In this version you'll have only a paddle moving, a ball and a grid of bricks. T
 
 In this version I've added textures for the Ball, Paddle and Bricks. I've also added text for lives and score, and the following powerUps: ExpandPaddle, ShrinkPaddle, ExtraLife, MultiBall
 
-# Up coming version features
+# Version 3
 
-I'll add sounds, resolving some of the bugs and most important I'll add powerups.
+In this version I've added the menu system. There are the Main Menu, Option Menu, Statistics Menu, Gameplay Menu and Pause Menu. For the buttons you can click them with the mouse and W/S or Up/Down arrow, you can hover over the buttons. 
